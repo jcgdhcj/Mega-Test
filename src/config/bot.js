@@ -141,7 +141,7 @@ export const botConfig = {
     },
     footer: {
       // Default footer text used in bot embeds.
-      text: "Super Bot",
+      text: "Mega Bot",
       // Footer icon URL (null = no icon).
       icon: null,
     },
