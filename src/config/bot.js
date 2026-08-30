@@ -39,7 +39,7 @@ export const botConfig = {
     owners: process.env.OWNER_IDS?.split(",").map((id) => id.trim()).filter(Boolean) || [],
 
     // Default wait time between command uses (in seconds).
-    defaultCooldown: 3,
+    defaultCooldown: 2,
 
     // If true, old commands are removed before re-registering.
     deleteCommands: false,
@@ -172,7 +172,7 @@ export const botConfig = {
     startingBalance: 0,
 
     // Maximum bank amount before upgrades (if upgrades are used).
-    baseBankCapacity: 100000,
+    baseBankCapacity: 1000000,
 
     // Daily reward amount.
     dailyAmount: 100,
