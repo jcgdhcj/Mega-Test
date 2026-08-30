@@ -29,6 +29,10 @@ export default {
             const userId = interaction.user.id;
             const guildId = interaction.guildId;
             const betAmount = interaction.options.getInteger("amount");
+            if (betAmount <= 0) {
+                return InteractionHelper.safeEditReply(interaction, { content: "**Not a valid number.**" });
+            }
+        
             const now = Date.now();
 
             const userData = await getEconomyData(client, guildId, userId);
