@@ -141,7 +141,7 @@ export const botConfig = {
     },
     footer: {
       // Default footer text used in bot embeds.
-      text: "Mega Bot",
+      text: "Mega Test",
       // Footer icon URL (null = no icon).
       icon: null,
     },
@@ -187,7 +187,7 @@ export const botConfig = {
 
     // Command cooldowns (milliseconds).
     cooldowns: {
-      daily: 24 * 60 * 60 * 1000,
+      daily: 18 * 60 * 60 * 1000,
       work: 60 * 60 * 1000,
       crime: 2 * 60 * 60 * 1000,
       rob: 4 * 60 * 60 * 1000,
