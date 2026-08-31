@@ -8,7 +8,7 @@ import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { botConfig } from '../../config/bot.js';
 
-const DAILY_COOLDOWN = 24 * 60 * 60 * 1000;
+const DAILY_COOLDOWN = 18 * 60 * 60 * 1000;
 const DAILY_AMOUNT = botConfig.economy?.dailyAmount ?? 100;
 const PREMIUM_BONUS_PERCENTAGE = 0.1;
 
