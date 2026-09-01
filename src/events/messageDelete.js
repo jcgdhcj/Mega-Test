@@ -1,9 +1,8 @@
 import { Events } from 'discord.js';
-import { logEvent, EVENT_TYPES, getLogChannel } from '../services/loggingService.js';
+import { logEvent, EVENT_TYPES } from '../services/loggingService.js';
 import { logger } from '../utils/logger.js';
 import { getReactionRoleMessage, deleteReactionRoleMessage } from '../services/reactionRoleService.js';
 import { formatLogLine } from '../utils/logging/logEmbeds.js';
-import { addSnipe } from '../utils/snipeCache.js';
 
 const MAX_LOGGED_MESSAGE_CONTENT_LENGTH = 1024;
 
@@ -15,7 +14,6 @@ export default {
     try {
       if (!message.guild) return;
 
-      // --- Reaction Role Cleanup ---
       try {
         const reactionRoleData = await getReactionRoleMessage(message.client, message.guild.id, message.id);
         if (reactionRoleData) {
@@ -47,53 +45,37 @@ export default {
 
       if (message.author?.bot) return;
 
-      // --- Check if Guild Has a Configured Log Channel ---
-      const hasLogChannel = await getLogChannel(message.client, message.guild.id, EVENT_TYPES.MESSAGE_DELETE);
+      const metaLines = [
+        formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unknown'),
+        formatLogLine('Message ID', `\`${message.id}\``),
+        formatLogLine('Message author', message.author ? message.author.toString() : 'Unknown'),
+        formatLogLine('Message created', `<t:${Math.floor(message.createdTimestamp / 1000)}:R>`),
+      ];
 
-      if (hasLogChannel) {
-        // Path A: Server HAS a log channel -> Log to channel (Zero RAM overhead)
-        const metaLines = [
-          formatLogLine('Channel', message.channel ? `${message.channel.name} ${message.channel.toString()}` : 'Unknown'),
-          formatLogLine('Message ID', `\`${message.id}\``),
-          formatLogLine('Message author', message.author ? message.author.toString() : 'Unknown'),
-          formatLogLine('Message created', `<t:${Math.floor(message.createdTimestamp / 1000)}:R>`),
-        ];
-
-        let messageBody = null;
-        if (message.content) {
-          messageBody = message.content.length > MAX_LOGGED_MESSAGE_CONTENT_LENGTH
-            ? `${message.content.substring(0, MAX_LOGGED_MESSAGE_CONTENT_LENGTH - 3)}...`
-            : message.content;
-        }
-
-        if (message.attachments.size > 0) {
-          metaLines.push(formatLogLine('Attachments', String(message.attachments.size)));
-        }
-
-        await logEvent({
-          client: message.client,
-          guildId: message.guild.id,
-          eventType: EVENT_TYPES.MESSAGE_DELETE,
-          data: {
-            title: 'Message deleted',
-            lines: metaLines,
-            quoted: true,
-            section: messageBody ? { title: 'Message', body: messageBody || '*(empty message)*' } : null,
-            userId: message.author?.id,
-            channelId: message.channel.id,
-          }
-        });
-      } else {
-        // Path B: Server HAS NO log channel -> Fallback to 5 MB capped RAM cache
-        addSnipe(message.channel.id, {
-          content: message.content || null,
-          authorTag: message.author?.tag || "Unknown User",
-          authorAvatar: message.author?.displayAvatarURL({ dynamic: true }),
-          attachment: message.attachments.first()?.url || null,
-          createdAt: message.createdAt,
-          deletedAt: new Date(),
-        });
+      let messageBody = null;
+      if (message.content) {
+        messageBody = message.content.length > MAX_LOGGED_MESSAGE_CONTENT_LENGTH
+          ? `${message.content.substring(0, MAX_LOGGED_MESSAGE_CONTENT_LENGTH - 3)}...`
+          : message.content;
       }
+
+      if (message.attachments.size > 0) {
+        metaLines.push(formatLogLine('Attachments', String(message.attachments.size)));
+      }
+
+      await logEvent({
+        client: message.client,
+        guildId: message.guild.id,
+        eventType: EVENT_TYPES.MESSAGE_DELETE,
+        data: {
+          title: 'Message deleted',
+          lines: metaLines,
+          quoted: true,
+          section: messageBody ? { title: 'Message', body: messageBody || '*(empty message)*' } : null,
+          userId: message.author?.id,
+          channelId: message.channel.id,
+        }
+      });
 
     } catch (error) {
       logger.error('Error in messageDelete event:', error);
